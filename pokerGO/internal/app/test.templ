@@ -1,0 +1,27 @@
+package server
+
+templ imphtmx() {
+    <head>
+        <script src="https://unpkg.com/htmx.org@1.9.9"></script>
+        <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+    </head>
+}
+
+templ pagemain() {
+    @imphtmx()
+    <button hx-get="/startgame" hx-target="this" hx-swap="outerHTML" hx-replace-url="true">
+        Create quick game
+    </button>
+}
+
+templ turner(strr string) {
+    @imphtmx()
+    <div hx-ext="ws" ws-connect={strr}>
+        <form ws-send>
+            <button>
+                Increment
+            </button>
+        </form>
+        <div id="count"></div>
+    </div>
+}
