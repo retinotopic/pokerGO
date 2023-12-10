@@ -1,0 +1,65 @@
+package htmxtempl
+
+templ Imphtmx() {
+    <head>
+        <script src="https://unpkg.com/htmx.org@1.9.9"></script>
+        <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+    </head>
+}
+
+templ Pagemain() {
+    @Imphtmx()
+    <button hx-get="/startgame" hx-target="this" hx-swap="outerHTML" hx-replace-url="true">
+        Create quick game
+    </button>
+}
+
+templ Turner(strr string) {
+    @Imphtmx()
+    <div hx-ext="ws" ws-connect={strr}>
+        <button id="count1" ws-send>
+            Take seat
+        </button>
+        <button id="count2" ws-send>
+            Take seat
+        </button>
+        <button id="count3" ws-send>
+            Take seat
+        </button>
+        <button id="count4" ws-send>
+            Take seat
+        </button>
+        <button id="count5" ws-send>
+            Take seat
+        </button>
+        <button id="count6" ws-send>
+            Take seat
+        </button>
+        <ol id="piece">
+            
+        </ol>
+        <div id="form"></div>
+        <div id="invitelist"></div>
+    </div>
+}
+templ Form() {
+    <form id="form" name="Stack" name="Name" ws-send>
+        <input name="Name" Enter your name />
+        <input name="Stack" Enter your wished stack />
+        <button type="submit"> Send data </button>
+    </form>
+}
+templ Refresh(mls string) {
+    <head>
+        <meta http-equiv="refresh" content={mls} />
+    </head>
+    <b> loading... </b>
+}
+templ FormList(val string, name string) {
+    <form name="RecvStack" name="RecvName" hx-swap-oob="beforeend:#invitelist" ws-send>
+        <input name="RecvStack" value={val} />
+        <output name="RecvName" value={name}></output>
+        <button type="submit"> Accept </button>
+        <button hx-swap-oob="delete:#invitelist"> Deny </button>
+    </form>
+}
