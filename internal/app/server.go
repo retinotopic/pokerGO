@@ -42,6 +42,7 @@ func (s *Server) Run() error {
 	http.HandleFunc("/", s.handleWS)
 	http.HandleFunc("/lobby/", s.lobby)
 	http.Handle("/main", templ.Handler(htmpl.Pagemain()))
+	//return http.ListenAndServeTLS(s.listenaddr, nil, nil,nil)
 	return http.ListenAndServe(s.listenaddr, nil)
 }
 
@@ -72,6 +73,7 @@ func (s *Server) lobby(w http.ResponseWriter, r *http.Request) {
 				htmpl.Turner("/"+wsurl).Render(r.Context(), w)
 			} else {
 				htmpl.Refresh(strconv.Itoa(1)).Render(r.Context(), w)
+				return
 			}
 		} else {
 			hub.Lock()
