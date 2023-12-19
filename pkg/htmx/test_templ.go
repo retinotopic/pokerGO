@@ -132,7 +132,7 @@ func Turner(strr string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" x-data=\"{ open: false , count: -1 }\"><template id=\"PlayerPlace\"><div><span>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" x-data=\"{ open: false , count: -1 }\"><template id=\"PlayerPlace\"><div id=\"-10\"><span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -150,7 +150,7 @@ func Turner(strr string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div></template><template id=\"PlayerButton\"><button x-on:click=\"open = ! open;handleClickId(this.id)\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div></template><template id=\"PlayerButton\"><button id=\"-11\" x-on:click=\"open = ! open;handleClickId(this.id)\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -159,12 +159,66 @@ func Turner(strr string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></template><form x-show.important=\"open\" name=\"myForm\" ws-send><input name=\"Name\" Enter your name required> <input id=\"Stack\" type=\"number\" Enter your wished stack required pattern=\"[0-9]*\" inputmode=\"numeric\"> <button x-on:click=\"open = ! open;handleClick(count)\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></template><button id=\"0\" x-on:click=\"open = ! open;handleClickId(this.id)\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var12 := `Send data `
+		templ_7745c5c3_Var12 := `Take seat`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button> <button id=\"1\" x-on:click=\"open = ! open;handleClickId(this.id)\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var13 := `Take seat`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button> <button id=\"2\" x-on:click=\"open = ! open;handleClickId(this.id)\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var14 := `Take seat`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button> <button id=\"3\" x-on:click=\"open = ! open;handleClickId(this.id)\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var15 := `Take seat`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button> <button id=\"4\" x-on:click=\"open = ! open;handleClickId(this.id)\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var16 := `Take seat`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button> <button id=\"5\" x-on:click=\"open = ! open;handleClickId(this.id)\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var17 := `Take seat`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button><form x-show.important=\"open\" name=\"myForm\" ws-send><input name=\"Name\" Enter your name required> <input id=\"Stack\" type=\"number\" Enter your wished stack required pattern=\"[0-9]*\" inputmode=\"numeric\"> <button x-on:click=\"open = ! open;handleClick(count)\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var18 := `Send data `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -172,7 +226,7 @@ func Turner(strr string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var13 := `
+		templ_7745c5c3_Var19 := `
             var cntGlobal = -1
             function handleClick(cnt) {
                 cntGlobal = cnt
@@ -181,26 +235,31 @@ func Turner(strr string) templ.Component {
                 this.count = cnt1
             }
             htmx.on('htmx:wsBeforeMessage', (event) => {
-                obj = JSON.parse(event.detail.message)
-                console.log(obj[0])
-                for(let i = 0; i < obj.length; i++) {
-                    if obj[i].IsActive == true {
-                        str = "PlayerPlace"
-                    } else {
-                        str = "PlayerButton"
-                    }
-                    let ptemp = document.getElementById(str);
-                    let clon = ptemp.content.cloneNode(true)
-                    clon.setAttribute("id", obj[i].Place);
-                    document.getElementById(obj[i].Place).replaceWith(clon)
+                player = JSON.parse(event.detail.message)
+                console.log(player)
+                let str;
+                let plpl;
+                if (player.IsActive === true) {
+                    str = "PlayerPlace";
+                } else {
+                    str = "PlayerButton";
                 }
+                plpl = document.getElementById(str).content.firstElementChild;
+                plpl.id = player.Place
+                if (player.IsActive === true) {
+                    plpl.children[0].textContent = player.Name;
+                    plpl.children[1].textContent = player.Stack;
+                }
+                document.getElementById(player.Place).replaceWith(plpl)
+
+
             });
             htmx.on('htmx:wsBeforeSend', (event) => {
                 let stack = Number(document.getElementById("Stack").value)
                 event.detail.socketWrapper.send(   JSON.stringify({'Stack':stack,'Place':cntGlobal,'IsActive':true}))
             });
         `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -223,9 +282,9 @@ func Refresh(mls string) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var14 == nil {
-			templ_7745c5c3_Var14 = templ.NopComponent
+		templ_7745c5c3_Var20 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var20 == nil {
+			templ_7745c5c3_Var20 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<head><meta http-equiv=\"refresh\" content=\"")
@@ -240,8 +299,8 @@ func Refresh(mls string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var15 := `loading... `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
+		templ_7745c5c3_Var21 := `loading... `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

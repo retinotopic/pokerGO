@@ -21,17 +21,41 @@ templ Turner(strr string) {
     <div hx-ext="ws" ws-connect={strr} x-data="{ open: false , count: -1 }">
 
         <template id="PlayerPlace">
-            <div>
+            <div id="-10" >
                 <span>Name</span>
                 <span>Stack</span>
             </div>
         </template>
 
         <template id="PlayerButton">
-            <button x-on:click="open = ! open;handleClickId(this.id)">
+            <button id="-11" x-on:click="open = ! open;handleClickId(this.id)">
                 Take seat
             </button>
         </template>
+
+        <button id="0" x-on:click="open = ! open;handleClickId(this.id)">
+            Take seat
+        </button>
+
+        <button id="1" x-on:click="open = ! open;handleClickId(this.id)">
+            Take seat
+        </button>
+
+        <button id="2" x-on:click="open = ! open;handleClickId(this.id)">
+            Take seat
+        </button>
+
+        <button id="3" x-on:click="open = ! open;handleClickId(this.id)">
+            Take seat
+        </button>
+
+        <button id="4" x-on:click="open = ! open;handleClickId(this.id)">
+            Take seat
+        </button>
+
+        <button id="5" x-on:click="open = ! open;handleClickId(this.id)">
+            Take seat
+        </button>
 
         <form x-show.important="open" name="myForm" ws-send>
             <input name="Name" Enter your name required />
@@ -48,19 +72,24 @@ templ Turner(strr string) {
                 this.count = cnt1
             }
             htmx.on('htmx:wsBeforeMessage', (event) => {
-                obj = JSON.parse(event.detail.message)
-                console.log(obj[0])
-                for (let i = 0; i < obj.length; i++) {
-                    if obj[i].IsActive == true {
-                        str = "PlayerPlace"
-                    } else {
-                        str = "PlayerButton"
-                    }
-                    let ptemp = document.getElementById(str);
-                    let clon = ptemp.content.cloneNode(true)
-                    clon.setAttribute("id", obj[i].Place);
-                    document.getElementById(obj[i].Place).replaceWith(clon)
+                player = JSON.parse(event.detail.message)
+                console.log(player)
+                let str;
+                let plpl;
+                if (player.IsActive === true) {
+                    str = "PlayerPlace";
+                } else {
+                    str = "PlayerButton";
                 }
+                plpl = document.getElementById(str).content.firstElementChild;
+                plpl.id = player.Place
+                if (player.IsActive === true) {
+                    plpl.children[0].textContent = player.Name;
+                    plpl.children[1].textContent = player.Stack;
+                }
+                document.getElementById(player.Place).replaceWith(plpl)
+
+
             });
             htmx.on('htmx:wsBeforeSend', (event) => {
                 let stack = Number(document.getElementById("Stack").value)

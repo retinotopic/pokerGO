@@ -69,6 +69,17 @@ func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
 
 	}()
 	player.Conn = conn
+	for _, v := range l.Players {
+		data["Name"] = v.Name
+		data["Stack"] = v.Bankroll
+		data["IsActive"] = v.IsActive
+		data["Place"] = v.Place
+		err := player.Conn.WriteJSON(data)
+		if err != nil {
+			fmt.Println(err, "WriteJSON start")
+		}
+	}
+
 	for {
 		err := player.Conn.ReadJSON(&data)
 		if err != nil {
@@ -85,7 +96,7 @@ func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
 		}
 
 		fmt.Println(data)
-		err = player.Conn.WriteMessage(websocket.TextMessage, form)
+		err = player.Conn.WriteJSON(player)
 		if err != nil {
 			fmt.Println(err, "conn writer render error")
 		}
