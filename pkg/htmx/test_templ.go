@@ -222,7 +222,7 @@ func Turner(strr string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></form><script>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></form><script defer>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -237,6 +237,7 @@ func Turner(strr string) templ.Component {
             htmx.on('htmx:wsBeforeMessage', (event) => {
                 player = JSON.parse(event.detail.message)
                 console.log(player)
+                console.log(player.Place)
                 let str;
                 let plpl;
                 if (player.IsActive === true) {
@@ -244,7 +245,8 @@ func Turner(strr string) templ.Component {
                 } else {
                     str = "PlayerButton";
                 }
-                plpl = document.getElementById(str).content.firstElementChild;
+                plpl = document.getElementById(str).content.firstElementChild.cloneNode(true);
+                console.log(plpl)
                 plpl.id = player.Place
                 if (player.IsActive === true) {
                     plpl.children[0].textContent = player.Name;

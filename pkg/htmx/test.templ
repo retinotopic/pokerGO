@@ -63,7 +63,7 @@ templ Turner(strr string) {
             <button x-on:click="open = ! open;handleClick(count)"> Send data </button>
         </form>
 
-        <script>
+        <script defer>
             var cntGlobal = -1
             function handleClick(cnt) {
                 cntGlobal = cnt
@@ -74,6 +74,7 @@ templ Turner(strr string) {
             htmx.on('htmx:wsBeforeMessage', (event) => {
                 player = JSON.parse(event.detail.message)
                 console.log(player)
+                console.log(player.Place)
                 let str;
                 let plpl;
                 if (player.IsActive === true) {
@@ -81,7 +82,8 @@ templ Turner(strr string) {
                 } else {
                     str = "PlayerButton";
                 }
-                plpl = document.getElementById(str).content.firstElementChild;
+                plpl = document.getElementById(str).content.firstElementChild.cloneNode(true);
+                console.log(plpl)
                 plpl.id = player.Place
                 if (player.IsActive === true) {
                     plpl.children[0].textContent = player.Name;

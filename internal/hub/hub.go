@@ -78,6 +78,7 @@ func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
 		if err != nil {
 			fmt.Println(err, "WriteJSON start")
 		}
+		fmt.Println(data)
 	}
 
 	for {
