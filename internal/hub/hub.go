@@ -10,7 +10,7 @@ import (
 )
 
 func NewLobby() *Lobby {
-	l := &Lobby{Players: make(map[string]*player.Player)}
+	l := &Lobby{Players: make(map[string]*player.Player), Occupied: make(map[int]bool), PlayerCh: make(chan *player.Player)}
 	return l
 }
 
@@ -20,6 +20,7 @@ type Lobby struct {
 	Occupied map[int]bool
 	sync.Mutex
 	sync.Once
+	PlayerCh chan *player.Player
 	//Conns   chan *websocket.Conn
 }
 
@@ -27,36 +28,25 @@ var button = []byte("<form id=count ws-send>\n    <button>\n        Take seat\n 
 var form = []byte("<form id=form name=Stack name=Name ws-send>\n    <input id=Name name=Name>Enter your name</input>\n    <input id=Stack name=Stack>Enter your wished stack</input>\n    <button type=submit>Send data</button>\n</form>")
 
 // <ol hx-swap-oob=beforeend:#piece>    <li>%v</li></ol>
-type tempPlayer struct {
-	Name     string `json:"Name"`
-	Bankroll int    `json:"Stack"`
-	IsActive bool   `json:"IsActive"`
-	Place    int    `json:"Place"`
-}
 
 func (l *Lobby) LobbyWork() {
 	fmt.Println("im in")
-	/*for {
+	for {
 		select {
-		case <-l.Recv:
-			fmt.Println("im in3")
-			l.LobbyWork2()
-		default:
-			fmt.Println("im in4")
-			time.Sleep(time.Second)
+		case x := <-l.PlayerCh:
+			for _, v := range l.Players {
+				v.Conn.WriteJSON(x)
+				fmt.Println(v, "piskaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+			}
 		}
-		for _, v := range l.Players {
-			v.Conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("<div> id=count %v</div>", l.Counter)))
-
-		}
-	}*/
+	}
 }
 
 var data = map[string]interface{}{
 	"Name":     "",
-	"Stack":    0,
+	"Stack":    int(0),
 	"IsActive": false,
-	"Place":    0,
+	"Place":    int(0),
 }
 
 func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
@@ -78,7 +68,7 @@ func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
 		if err != nil {
 			fmt.Println(err, "WriteJSON start")
 		}
-		fmt.Println(data)
+		fmt.Println(data, "start")
 	}
 
 	for {
@@ -88,19 +78,18 @@ func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
 			player.Conn = nil
 			break
 		}
-		if player.IsActive == false && l.Occupied[data["Place"].(int)] == false {
+		if player.IsActive == false && l.Occupied[int(data["Place"].(float64))] == false && data["IsActive"].(bool) == true {
 			player.Name = data["Name"].(string)
-			player.Bankroll = data["Stack"].(int)
+			player.Bankroll = int(data["Stack"].(float64))
 			player.IsActive = data["IsActive"].(bool)
-			player.Place = data["Place"].(int)
-			l.Occupied[data["Place"].(int)] = true
+			player.Place = int(data["Place"].(float64))
+			l.Occupied[int(data["Place"].(float64))] = true
+		} else if player.IsActive == true && data["IsActive"].(bool) == false {
+			player.IsActive = data["IsActive"].(bool)
+			delete(l.Occupied, player.Place)
 		}
-
-		fmt.Println(data)
-		err = player.Conn.WriteJSON(player)
-		if err != nil {
-			fmt.Println(err, "conn writer render error")
-		}
+		fmt.Println(data, "pered v ch")
+		l.PlayerCh <- player
 	}
 }
 func (l *Lobby) Game() {
