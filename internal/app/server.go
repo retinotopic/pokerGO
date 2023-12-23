@@ -39,8 +39,8 @@ func NewServer(listenaddr string) *Server {
 
 func (s *Server) Run() error {
 	http.HandleFunc("/startgame", s.startgame)
-	http.HandleFunc("/", s.handleWS)
-	http.HandleFunc("/lobby/", s.lobby)
+	final := http.HandlerFunc(s.handleWS)
+	http.Handle("/lobby/", s.lobbyMW(final))
 	http.Handle("/main", templ.Handler(htmpl.Pagemain()))
 	//return http.ListenAndServeTLS(s.listenaddr, nil, nil,nil)
 	return http.ListenAndServe(s.listenaddr, nil)
@@ -60,30 +60,32 @@ func (s *Server) startgame(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/lobby/"+s.str, http.StatusFound)
 	//w.Header().Set("HX-Redirect","/"+strr) //remember
 }
-func (s *Server) lobby(w http.ResponseWriter, r *http.Request) {
-	wsurl := r.URL.Path[7:]
-	fmt.Println(wsurl, "///")
-	if hub, ok := s.urllobby[wsurl]; ok {
-		cookie, err := ReadHashCookie(r, key, r.Cookies())
-		if err != nil {
-			cookie = WriteHashCookie(w, key)
-		}
-		if _, ok := hub.Players[cookie.Value]; ok {
-			if hub.Players[cookie.Value].Conn == nil {
-				htmpl.Turner("/"+wsurl).Render(r.Context(), w)
+func (s *Server) lobbyMW(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		wsurl := r.URL.Path[7:]
+		fmt.Println(wsurl, "///")
+		if hub, ok := s.urllobby[wsurl]; ok {
+			cookie, err := ReadHashCookie(r, key, r.Cookies())
+			if err != nil {
+				cookie = WriteHashCookie(w, key)
+			}
+			if _, ok := hub.Players[cookie.Value]; ok {
+				if hub.Players[cookie.Value].Conn == nil {
+					htmpl.Turner("/"+wsurl).Render(r.Context(), w)
+				} else {
+					htmpl.Refresh(strconv.Itoa(1)).Render(r.Context(), w)
+					return
+				}
 			} else {
-				htmpl.Refresh(strconv.Itoa(1)).Render(r.Context(), w)
-				return
+				hub.Lock()
+				hub.Players[cookie.Value] = player.NewPlayer()
+				hub.Unlock()
+				htmpl.Turner("/"+wsurl).Render(r.Context(), w)
 			}
 		} else {
-			hub.Lock()
-			hub.Players[cookie.Value] = player.NewPlayer()
-			hub.Unlock()
-			htmpl.Turner("/"+wsurl).Render(r.Context(), w)
+			http.Redirect(w, r, "/main", http.StatusNotFound)
 		}
-	} else {
-		http.Redirect(w, r, "/main", http.StatusNotFound)
-	}
+	})
 
 }
 
