@@ -70,6 +70,7 @@ templ Turner(strr string) {
         <script defer x-data>
             var cntGlobal = -1;
             var isact = false;
+            var isgame = false;
             function handleClickId(cnt) {
                 cntGlobal = cnt;
                 isact = true
@@ -77,6 +78,9 @@ templ Turner(strr string) {
             }
             function LeaveSeat() {
                 isact = false
+            }
+            function StartGame() {
+                isgame = true
             }
             htmx.on('htmx:wsBeforeMessage', (event) => {
                 player = JSON.parse(event.detail.message);
@@ -103,7 +107,7 @@ templ Turner(strr string) {
             htmx.on('htmx:wsBeforeSend', (event) => {
                 let stack = Number(document.getElementById("Stack").value)
                 let name = document.getElementById("Name").value
-                event.detail.socketWrapper.send(   JSON.stringify({'Name':name,'Stack':stack,'Place':Number(cntGlobal),'IsActive':isact}))
+                event.detail.socketWrapper.send(   JSON.stringify({'Name':name,'Stack':stack,'Place':Number(cntGlobal),'IsActive':isact,'IsGame':isgame}))
             });
         </script>
     </div>

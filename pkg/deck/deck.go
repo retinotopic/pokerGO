@@ -33,5 +33,4 @@ func Shuffle(deck deck, r *rand.Rand) {
 		j := r.Intn(len(deck) - 1)
 		deck[i], deck[j] = deck[j], deck[i]
 	}
-
 }

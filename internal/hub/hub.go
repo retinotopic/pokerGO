@@ -21,6 +21,7 @@ type Lobby struct {
 	sync.Mutex
 	sync.Once
 	PlayerCh chan *player.Player
+	isGame   chan struct{}
 	//Conns   chan *websocket.Conn
 }
 
@@ -38,6 +39,8 @@ func (l *Lobby) LobbyWork() {
 				v.Conn.WriteJSON(x)
 				fmt.Println(v, "piskaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 			}
+		case <-l.isGame:
+			l.Game()
 		}
 	}
 }
@@ -47,6 +50,7 @@ var data = map[string]interface{}{
 	"Stack":    int(0),
 	"IsActive": false,
 	"Place":    int(0),
+	"IsGame":   false,
 }
 
 func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
@@ -77,6 +81,9 @@ func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
 			fmt.Println(err, "conn read error")
 			player.Conn = nil
 			break
+		}
+		if l.Admin == player && len(l.Occupied) >= 2 && data["IsGame"].(bool) == true {
+			l.isGame <- struct{}{}
 		}
 		if player.IsActive == false && l.Occupied[int(data["Place"].(float64))] == false && data["IsActive"].(bool) == true {
 			player.Name = data["Name"].(string)
