@@ -20,13 +20,10 @@ type Lobby struct {
 	Occupied map[int]bool
 	sync.Mutex
 	sync.Once
-	PlayerCh chan *player.Player
-	isGame   chan struct{}
+	PlayerCh   chan *player.Player
+	PlayerTurn chan *player.Player
 	//Conns   chan *websocket.Conn
 }
-
-var button = []byte("<form id=count ws-send>\n    <button>\n        Take seat\n    </button>\n</form>")
-var form = []byte("<form id=form name=Stack name=Name ws-send>\n    <input id=Name name=Name>Enter your name</input>\n    <input id=Stack name=Stack>Enter your wished stack</input>\n    <button type=submit>Send data</button>\n</form>")
 
 // <ol hx-swap-oob=beforeend:#piece>    <li>%v</li></ol>
 
@@ -39,8 +36,6 @@ func (l *Lobby) LobbyWork() {
 				v.Conn.WriteJSON(x)
 				fmt.Println(v, "piskaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 			}
-		case <-l.isGame:
-			l.Game()
 		}
 	}
 }
@@ -50,13 +45,16 @@ var data = map[string]interface{}{
 	"Stack":    int(0),
 	"IsActive": false,
 	"Place":    int(0),
-	"IsGame":   false,
+	"IsAdmin":  false,
+	"IsFold":   false,
+	"IsBet":    false,
 }
 
 func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
 	fmt.Println("im in2")
 	l.Do(func() {
 		l.Admin = player
+
 	})
 	defer func() {
 		fmt.Println("rip connection")
@@ -83,9 +81,8 @@ func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
 			break
 		}
 		if l.Admin == player && len(l.Occupied) >= 2 && data["IsGame"].(bool) == true {
-			l.isGame <- struct{}{}
-		}
-		if player.IsActive == false && l.Occupied[int(data["Place"].(float64))] == false && data["IsActive"].(bool) == true {
+			data["IsAdmin"] = true
+		} else if player.IsActive == false && l.Occupied[int(data["Place"].(float64))] == false && data["IsActive"].(bool) == true {
 			player.Name = data["Name"].(string)
 			player.Bankroll = int(data["Stack"].(float64))
 			player.IsActive = data["IsActive"].(bool)
@@ -97,10 +94,5 @@ func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
 		}
 		fmt.Println(data, "pered v ch")
 		l.PlayerCh <- player
-	}
-}
-func (l *Lobby) Game() {
-	for {
-		select {}
 	}
 }

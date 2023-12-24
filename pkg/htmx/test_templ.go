@@ -238,6 +238,7 @@ func Turner(strr string) templ.Component {
 		templ_7745c5c3_Var20 := `
             var cntGlobal = -1;
             var isact = false;
+            var isgame = false;
             function handleClickId(cnt) {
                 cntGlobal = cnt;
                 isact = true
@@ -245,6 +246,9 @@ func Turner(strr string) templ.Component {
             }
             function LeaveSeat() {
                 isact = false
+            }
+            function StartGame() {
+                isgame = true
             }
             htmx.on('htmx:wsBeforeMessage', (event) => {
                 player = JSON.parse(event.detail.message);
@@ -271,7 +275,7 @@ func Turner(strr string) templ.Component {
             htmx.on('htmx:wsBeforeSend', (event) => {
                 let stack = Number(document.getElementById("Stack").value)
                 let name = document.getElementById("Name").value
-                event.detail.socketWrapper.send(   JSON.stringify({'Name':name,'Stack':stack,'Place':Number(cntGlobal),'IsActive':isact}))
+                event.detail.socketWrapper.send(   JSON.stringify({'Name':name,'Stack':stack,'Place':Number(cntGlobal),'IsActive':isact,'IsGame':isgame}))
             });
         `
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
