@@ -4,13 +4,13 @@ import (
 	"math/rand"
 )
 
-type card struct {
+type Card struct {
 	Value int
 	Suit  int
 }
 
 // Deck represents a deck of cards
-type deck []card
+type deck []Card
 
 // NewDeck returns a new shuffled deck of 52 cards
 func NewDeck() deck {
@@ -19,7 +19,7 @@ func NewDeck() deck {
 	values := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
 
 	for i := range deck {
-		deck[i] = card{
+		deck[i] = Card{
 			Value: values[i%13],
 			Suit:  suits[i/13],
 		}

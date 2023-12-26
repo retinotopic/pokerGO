@@ -121,8 +121,6 @@ templ Turner(strr string) {
                     if (player.IsAdmin === true) {
                         pllvs = document.getElementById("TemplateStart").content.firstElementChild.cloneNode(true);
                         document.getElementById("wsid").appendChild(pllvs);
-                    } else {
-                        removeIfExists("#StartGame")
                     }
                     document.getElementById(player.Place).replaceWith(plpl);
                 }

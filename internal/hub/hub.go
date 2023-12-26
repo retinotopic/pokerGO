@@ -3,6 +3,7 @@ package hub
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"pokerGO/internal/player"
 
@@ -22,6 +23,8 @@ type Lobby struct {
 	sync.Once
 	PlayerCh   chan *player.Player
 	PlayerTurn chan *player.Player
+	GameState  int
+	Timer      *time.Timer
 	//Conns   chan *websocket.Conn
 }
 
@@ -33,9 +36,23 @@ func (l *Lobby) LobbyWork() {
 		select {
 		case x := <-l.PlayerCh:
 			for _, v := range l.Players {
+				if x == v {
+
+				}
 				v.Conn.WriteJSON(x)
 				fmt.Println(v, "piskaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 			}
+		case <-l.Timer.C:
+			l.Timer = time.NewTimer(time.Second * 30)
+			c := 0
+			if l.GameState == 0 {
+				//first := randomString.NewSource().Intn(len(l.Players))
+			}
+			for _, v := range l.Players {
+				l.PlayerCh <- v
+				c++
+			}
+			l.GameState++
 		}
 	}
 }
@@ -45,32 +62,28 @@ var data = map[string]interface{}{
 	"Stack":    int(0),
 	"IsActive": false,
 	"Place":    int(0),
-	"IsAdmin":  false,
-	"IsFold":   false,
-	"IsBet":    false,
+	"Bet":      false,
+	"IsGame":   false,
 }
 
 func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
 	fmt.Println("im in2")
 	l.Do(func() {
 		l.Admin = player
-
+		player.Admin = true
 	})
+
 	defer func() {
 		fmt.Println("rip connection")
 
 	}()
 	player.Conn = conn
 	for _, v := range l.Players {
-		data["Name"] = v.Name
-		data["Stack"] = v.Bankroll
-		data["IsActive"] = v.IsActive
-		data["Place"] = v.Place
-		err := player.Conn.WriteJSON(data)
+		err := player.Conn.WriteJSON(v)
 		if err != nil {
 			fmt.Println(err, "WriteJSON start")
 		}
-		fmt.Println(data, "start")
+		fmt.Println("start")
 	}
 
 	for {
@@ -80,8 +93,8 @@ func (l *Lobby) Connhandle(player *player.Player, conn *websocket.Conn) {
 			player.Conn = nil
 			break
 		}
-		if l.Admin == player && len(l.Occupied) >= 2 && data["IsGame"].(bool) == true {
-			data["IsAdmin"] = true
+		if l.Admin == player && len(l.Occupied) >= 2 && data["IsGame"].(bool) == true && l.GameState == 0 {
+			l.Timer.Reset(time.Second * 0)
 		} else if player.IsActive == false && l.Occupied[int(data["Place"].(float64))] == false && data["IsActive"].(bool) == true {
 			player.Name = data["Name"].(string)
 			player.Bankroll = int(data["Stack"].(float64))
