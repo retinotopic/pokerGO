@@ -3,14 +3,16 @@ package hub
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"pokerGO/internal/player"
+	randomString "pokerGO/pkg/Strings"
 
 	"github.com/gorilla/websocket"
 )
 
 func NewLobby() *Lobby {
-	l := &Lobby{Players: make(map[string]*player.Player), Occupied: make(map[int]bool), PlayerCh: make(chan player.Player)}
+	l := &Lobby{Players: make(map[string]*player.Player), Occupied: make(map[int]bool), PlayerCh: make(chan player.Player), StartGame: make(chan struct{})}
 	return l
 }
 
@@ -22,8 +24,9 @@ type Lobby struct {
 	GameState  int
 	AdminOnce  sync.Once
 	PlayerCh   chan player.Player
-	PlayerTurn chan *player.Player
+	PlayerTurn *player.Player
 	StartGame  chan struct{}
+
 	//Conns   chan *websocket.Conn
 }
 
@@ -33,14 +36,9 @@ func (l *Lobby) LobbyWork() {
 	fmt.Println("im in")
 	for {
 		select {
-		case x := <-l.PlayerCh: // broadcoasting one to everyone
+		case x := <-l.PlayerCh: // broadcoasting one seat to everyone
 			for _, v := range l.Players {
-				xs := x
-				if xs != *v {
-					xs = v.PrivateSend()
-				}
-				v.Conn.WriteJSON(xs)
-				fmt.Println(v, "piskaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+				v.Conn.WriteJSON(x)
 			}
 		case <-l.StartGame:
 			l.Game()
@@ -72,28 +70,38 @@ func (l *Lobby) Connhandle(plr *player.Player, conn *websocket.Conn) {
 		}
 		fmt.Println("start")
 	}
-
 	for {
-		err := plr.Conn.ReadJSON(&data)
-		if err != nil {
-			fmt.Println(err, "conn read error")
-			plr.Conn = nil
-			break
+		_, ok := <-l.StartGame
+		if plr.IsActive == true || ok == true {
+			err := plr.Conn.ReadJSON(&data)
+			if err != nil {
+				fmt.Println(err, "conn read error")
+				plr.Conn = nil
+				break
+			}
+			if l.Admin == plr && len(l.Occupied) >= 2 && data.IsGame == true {
+				l.StartGame <- struct{}{}
+				close(l.StartGame)
+			}
+			plr.ChangeState(l.Occupied, data)
+			fmt.Println(data, "pered v ch")
+			l.PlayerCh <- *plr
 		}
-
-		if l.Admin == plr && len(l.Occupied) >= 2 && data.IsGame == true {
-			l.StartGame <- struct{}{}
-		}
-		plr.ChangeState(l.Occupied, data)
-		fmt.Println(data, "pered v ch")
-
-		l.PlayerCh <- *plr
-
 	}
 }
 func (l *Lobby) Game() {
-	//timer := time.NewTicker(time.Second * 1)
+	timer := time.NewTicker(time.Second * 1)
 	PlayerBroadcast := make(chan player.Player)
+	k, counter := randomString.NewSource().Intn(len(l.Occupied)), 0
+	for _, v := range l.Players {
+		if v.IsActive == true {
+			if counter == k {
+				l.PlayerTurn = v
+				break
+			}
+			counter++
+		}
+	}
 	for {
 		select {
 		case pb := <-PlayerBroadcast: // broadcoasting one to everyone
@@ -103,20 +111,23 @@ func (l *Lobby) Game() {
 					pbs = v.PrivateSend()
 				}
 				v.Conn.WriteJSON(pbs)
+				fmt.Println(v, "aaaaaaaaaaaaaaaaaaaaaaaaaaa")
+			}
+		case tick := <-timer.C:
+			timevalue := tick.Second()
+			PlayerBroadcast <- l.PlayerTurn.SendTimeValue(timevalue)
+		case pl := <-l.PlayerCh: // evaluating hand
+			if pl == *l.PlayerTurn {
+				// evaluate hand
+			}
+			for _, v := range l.Players {
+				pls := pl
+				if pls != *v {
+					pls = v.PrivateSend()
+				}
+				v.Conn.WriteJSON(pls)
 				fmt.Println(v, "piskaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 			}
-			/*case tick := <-timer.C:
-				timevalue := tick.Second()
-				PlayerBroadcast <- l.Players[l.CurrentTurn].SendTimeValue(timevalue)
-			case x1 := <-l.PlayerCh: // evaluating hand
-				for _, v := range l.Players {
-					xs := x
-					if xs != *v {
-						xs = v.PrivateSend()
-					}
-					v.Conn.WriteJSON(xs)
-					fmt.Println(v, "piskaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-				}*/
 		}
 	}
 }
