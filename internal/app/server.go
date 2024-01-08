@@ -40,7 +40,7 @@ func NewServer(listenaddr string) *Server {
 func (s *Server) Run() error {
 	http.HandleFunc("/startgame", s.startgame)
 	http.HandleFunc("/lobby/", s.lobbyMW)
-	http.HandleFunc("/lobby/", s.handleWS)
+	http.HandleFunc("/", s.handleWS)
 	http.Handle("/main", templ.Handler(htmpl.Pagemain()))
 	//return http.ListenAndServeTLS(s.listenaddr, nil, nil,nil)
 	return http.ListenAndServe(s.listenaddr, nil)
@@ -88,6 +88,7 @@ func (s *Server) lobbyMW(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.URL.Path[1:])
 	if hub, ok := s.urllobby[r.URL.Path[1:]]; ok {
 		cookie, err := ReadHashCookie(r, key, r.Cookies())
 		if err != nil {

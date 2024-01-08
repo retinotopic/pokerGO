@@ -12,7 +12,7 @@ import (
 )
 
 func NewLobby() *Lobby {
-	l := &Lobby{Players: make(map[string]*player.Player), Occupied: make(map[int]bool), PlayerCh: make(chan player.Player), StartGame: make(chan struct{})}
+	l := &Lobby{Players: make(map[string]*player.Player), Occupied: make(map[int]bool), PlayerCh: make(chan player.Player), StartGame: make(chan struct{}, 1)}
 	return l
 }
 
@@ -24,8 +24,8 @@ type Lobby struct {
 	GameState  int
 	AdminOnce  sync.Once
 	PlayerCh   chan player.Player
-	PlayerTurn *player.Player
 	StartGame  chan struct{}
+	PlayerTurn *player.Player
 
 	//Conns   chan *websocket.Conn
 }
@@ -48,7 +48,6 @@ func (l *Lobby) LobbyWork() {
 
 func (l *Lobby) Connhandle(plr *player.Player, conn *websocket.Conn) {
 	fmt.Println("im in2")
-	data := player.InterimPlayer{}
 	l.AdminOnce.Do(func() {
 		l.Admin = plr
 		plr.Admin = true
@@ -71,37 +70,28 @@ func (l *Lobby) Connhandle(plr *player.Player, conn *websocket.Conn) {
 		fmt.Println("start")
 	}
 	for {
-		_, ok := <-l.StartGame
-		if plr.IsActive == true || ok == true {
-			err := plr.Conn.ReadJSON(&data)
-			if err != nil {
-				fmt.Println(err, "conn read error")
-				plr.Conn = nil
-				break
-			}
-			if l.Admin == plr && len(l.Occupied) >= 2 && data.IsGame == true {
-				l.StartGame <- struct{}{}
-				close(l.StartGame)
-			}
-			plr.ChangeState(l.Occupied, data)
-			fmt.Println(data, "pered v ch")
-			l.PlayerCh <- *plr
+		err := plr.Conn.ReadJSON(player.MiddlewarePlayer{})
+		if err != nil {
+			fmt.Println(err, "conn read error")
+			plr.Conn = nil
+			break
 		}
+		plr.ChangeState(l.Occupied)
+		fmt.Println(player.MiddlewarePlayer{}, "pered v ch")
+		l.PlayerCh <- *plr
 	}
 }
 func (l *Lobby) Game() {
 	timer := time.NewTicker(time.Second * 1)
 	PlayerBroadcast := make(chan player.Player)
-	k, counter := randomString.NewSource().Intn(len(l.Occupied)), 0
+	k := randomString.NewSource().Intn(len(l.Occupied))
+	plorder := []*player.Player{}
 	for _, v := range l.Players {
 		if v.IsActive == true {
-			if counter == k {
-				l.PlayerTurn = v
-				break
-			}
-			counter++
+			plorder = append(plorder, v)
 		}
 	}
+	l.PlayerTurn = plorder[k]
 	for {
 		select {
 		case pb := <-PlayerBroadcast: // broadcoasting one to everyone
