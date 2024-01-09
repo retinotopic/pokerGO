@@ -7,7 +7,7 @@ import (
 )
 
 func NewPlayer() *Player {
-	return &Player{inActive: &Active{p: &Player{}}, Active: &Active{p: &Player{}}, inGame: &inGame{p: &Player{}}, CurrentState: &inActive{p: &Player{}}}
+	return &Player{inActive: &Active{p: &Player{}}, Active: &Active{p: &Player{}}, inGame: &inGame{p: &Player{}}, CurrentState: &Inactive{p: &Player{}}}
 }
 
 type Active struct {
@@ -20,17 +20,18 @@ func (s *Active) ToInactive(Occupied map[int]bool) {
 	delete(Occupied, s.p.Place)
 	s.p.SetState(s.p.inActive)
 }
-func (s *Active) ToGame(Occupied map[int]bool) {
+func (s *Active) ToGame(Occupied map[int]bool, ch chan<- struct{}) {
 	if s.p.Admin == true && len(Occupied) >= 2 && s.p.MWPlayer.IsGame == true {
 		s.p.SetState(s.p.inGame)
+		ch <- struct{}{}
 	}
 }
 
-type inActive struct {
+type Inactive struct {
 	p *Player
 }
 
-func (s *inActive) ToActive(Occupied map[int]bool) {
+func (s *Inactive) ToActive(Occupied map[int]bool) {
 	if Occupied[s.p.MWPlayer.Place] == false {
 		s.p.Name = s.p.MWPlayer.Name
 		s.p.Bankroll = s.p.MWPlayer.Stack
@@ -40,8 +41,8 @@ func (s *inActive) ToActive(Occupied map[int]bool) {
 		s.p.SetState(s.p.Active)
 	}
 }
-func (s *inActive) ToInactive(Occupied map[int]bool) {}
-func (s *inActive) ToGame(Occupied map[int]bool)     {}
+func (s *Inactive) ToInactive(Occupied map[int]bool)                 {}
+func (s *Inactive) ToGame(Occupied map[int]bool, ch chan<- struct{}) {}
 
 type inGame struct {
 	p *Player
@@ -49,14 +50,14 @@ type inGame struct {
 
 func (s *inGame) ToActive(Occupied map[int]bool)   {}
 func (s *inGame) ToInactive(Occupied map[int]bool) {}
-func (s *inGame) ToGame(Occupied map[int]bool) {
+func (s *inGame) ToGame(Occupied map[int]bool, ch chan<- struct{}) {
 	// bet validation will be here
 }
 
 type Stater interface {
 	ToActive(map[int]bool)
 	ToInactive(map[int]bool)
-	ToGame(map[int]bool)
+	ToGame(map[int]bool, chan<- struct{})
 }
 
 type Player struct {
@@ -73,7 +74,6 @@ type Player struct {
 	Active       Stater
 	inGame       Stater
 	CurrentState Stater
-	Pl           *Player
 	MWPlayer     MiddlewarePlayer
 }
 type MiddlewarePlayer struct {
@@ -94,9 +94,9 @@ func (p Player) SendTimeValue(time int) Player {
 }
 func (p *Player) SetState(str Stater) { p.CurrentState = str }
 
-func (p *Player) ChangeState(Occupied map[int]bool) {
+func (p *Player) ChangeState(Occupied map[int]bool, sch chan<- struct{}) {
 	if p.MWPlayer.IsGame == true {
-		p.CurrentState.ToGame(Occupied)
+		p.CurrentState.ToGame(Occupied, sch)
 	} else if p.MWPlayer.IsActive == true {
 		p.CurrentState.ToActive(Occupied)
 	} else {

@@ -25,8 +25,12 @@ templ Turner(strr string) {
             <span>Stack</span>
         </template>
 
+        <template id="TemplatePlaceHolder">
+            <div id="PlaceHolder"></div>
+        </template>
+
         <template id="PlayerButton">
-            <button x-on:click="open = ! open" onclick="handleClickId(this.id)">
+            <button x-on:click="open = ! open" onclick="handleClickId(this.parentElement.id)">
                 Take seat
             </button>
         </template>
@@ -44,7 +48,7 @@ templ Turner(strr string) {
         </template>
 
         <div id="0">
-            <button id="0" x-on:click="open = ! open" onclick="handleClickId(this.parentElement.id)">
+            <button x-on:click="open = ! open" onclick="handleClickId(this.parentElement.id)">
                 Take seat
             </button>
         </div>
@@ -80,15 +84,11 @@ templ Turner(strr string) {
         <div>
 
         <div id="StartDiv">
-            <button onclick="StartGame()">
-                Take seat
-            </button>
+            <div id="PlaceHolder"></div>
         <div>
 
         <div id="LeaveDiv">
-            <button onclick="handleClickId(this.id)">
-                Take seat
-            </button>
+            <div id="PlaceHolder"></div>
         <div>
 
         <form x-data x-show.important="open" name="myForm" ws-send>
@@ -99,6 +99,11 @@ templ Turner(strr string) {
 
 
         <script defer x-data>
+            plpl = document.getElementById("PlayerPlace").content.firstElementChild.cloneNode(true);
+            plbt = document.getElementById("PlayerButton").content.firstElementChild.cloneNode(true);
+            plhd = document.getElementById("TemplatePlaceHolder").content.firstElementChild.cloneNode(true);
+            plst = document.getElementById("TemplateStart").content.firstElementChild.cloneNode(true);
+            pllv = document.getElementById("TemplateLeave").content.firstElementChild.cloneNode(true);
             var placecnt = -1;
             var isact = false;
             var isgame = false;
@@ -112,54 +117,30 @@ templ Turner(strr string) {
             function StartGame() {
                 isgame = true
             }
-            function removeIfExists (selector) {
-                var x = document.querySelector(selector);
-                if (x) x.remove();
-            }
-            function addIfNotExists (selector,playerN,playerS) {
-                var x = document.querySelector(selector);
-                if (!x) {
-                    plpl.children[0].textContent = playerN;
-                    plpl.children[1].textContent = playerS;
-                    pllv = document.getElementById("TemplateLeave").content.firstElementChild.cloneNode(true);
-                    document.getElementById("wsid").appendChild(pllv);
-                }
-            }
             htmx.on('htmx:wsBeforeMessage', (event) => { <!-- Receiving messages -->
                 player = JSON.parse(event.detail.message);
                 console.log(player);
-                console.log(player.Place);
                 if (player.IsGame === true) {
                     console.log('aboba');
                 } else {
-                    let str;
-                    let plpl;
+                    let pl_current
+                    let pl_lv
                     if (player.IsActive === true) {
-                        str = "PlayerPlace";
+                        pl_lv = pllv;
+                        pl_current = plpl;
                     } else {
-                        str = "PlayerButton";
+                        pl_current = plbt;
+                        pl_lv = plhd;
                     }
-                    plpl = document.getElementById(str).content.firstElementChild.cloneNode(true);
-                    console.log(plpl);
-                    plpl.id = player.Place;
-                    if (player.IsActive === true) {
-                        addIfNotExists("#LeaveSeat",player.Name,player.Stack)
-                    } else {
-                        removeIfExists("#LeaveSeat")
-                    }
-                    if (player.IsAdmin === true) {
-                        pllvs = document.getElementById("TemplateStart").content.firstElementChild.cloneNode(true);
-                        document.getElementById("wsid").appendChild(pllvs);
-                    }
-                    document.getElementById(player.Place).replaceWith(plpl);
+                    document.getElementById(player.Place).firstElementChild.replaceWith(pl_current);
+                    document.getElementById("LeaveDiv").firstElementChild.replaceWith(pl_lv);
                 }
-
 
             });
             htmx.on('htmx:wsBeforeSend', (event) => { <!-- Sending messages -->
                 let stack = Number(document.getElementById("Stack").value)
                 let name = document.getElementById("Name").value
-                event.detail.socketWrapper.send(   JSON.stringify({'Name':name,'Stack':stack,'Place':Number(placecnt),'IsActive':isact,'IsGame':isgame}))
+                event.detail.socketWrapper.send(   JSON.stringify({'Name':name,'Stack':stack,'Place':Number(placecnt),'IsActive':isact,'IsGame':isgame,'Bet':bet}))
             });
         </script>
     </div>

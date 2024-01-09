@@ -25,7 +25,7 @@ type Lobby struct {
 	AdminOnce  sync.Once
 	PlayerCh   chan player.Player
 	StartGame  chan struct{}
-	PlayerTurn *player.Player
+	PlayerTurn player.Player
 
 	//Conns   chan *websocket.Conn
 }
@@ -76,38 +76,37 @@ func (l *Lobby) Connhandle(plr *player.Player, conn *websocket.Conn) {
 			plr.Conn = nil
 			break
 		}
-		plr.ChangeState(l.Occupied)
+		plr.ChangeState(l.Occupied, l.StartGame)
 		fmt.Println(player.MiddlewarePlayer{}, "pered v ch")
 		l.PlayerCh <- *plr
 	}
 }
 func (l *Lobby) Game() {
+	plorder := []player.Player{}
+	for _, v := range l.Players {
+		if v.IsActive == true {
+			plorder = append(plorder, *v)
+		}
+	}
 	timer := time.NewTicker(time.Second * 1)
 	PlayerBroadcast := make(chan player.Player)
 	k := randomString.NewSource().Intn(len(l.Occupied))
-	plorder := []*player.Player{}
-	for _, v := range l.Players {
-		if v.IsActive == true {
-			plorder = append(plorder, v)
-		}
-	}
 	l.PlayerTurn = plorder[k]
 	for {
 		select {
 		case pb := <-PlayerBroadcast: // broadcoasting one to everyone
 			for _, v := range l.Players {
-				pbs := pb
-				if pbs != *v {
-					pbs = v.PrivateSend()
+				if pb != *v {
+					pb = v.PrivateSend()
 				}
-				v.Conn.WriteJSON(pbs)
+				v.Conn.WriteJSON(pb)
 				fmt.Println(v, "aaaaaaaaaaaaaaaaaaaaaaaaaaa")
 			}
 		case tick := <-timer.C:
 			timevalue := tick.Second()
 			PlayerBroadcast <- l.PlayerTurn.SendTimeValue(timevalue)
 		case pl := <-l.PlayerCh: // evaluating hand
-			if pl == *l.PlayerTurn {
+			if pl == l.PlayerTurn {
 				// evaluate hand
 			}
 			for _, v := range l.Players {
@@ -116,7 +115,7 @@ func (l *Lobby) Game() {
 					pls = v.PrivateSend()
 				}
 				v.Conn.WriteJSON(pls)
-				fmt.Println(v, "piskaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+				fmt.Println(v, "898aaaaaaaaaaaaaaaaaaaaaaaaaa")
 			}
 		}
 	}
