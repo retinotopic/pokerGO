@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"pokerGO/internal/hub"
 	"pokerGO/internal/player"
-	rnds "pokerGO/pkg/Strings"
 	htmpl "pokerGO/pkg/htmx"
+	"pokerGO/pkg/randfuncs"
 	"strconv"
 	"time"
 
@@ -50,7 +50,7 @@ func (s *Server) Run() error {
 func (s *Server) startgame(w http.ResponseWriter, r *http.Request) {
 	strr := ""
 	for _, ok := s.urllobby[strr]; !ok; {
-		strr = rnds.RandomString(25, rnds.NewSource())
+		strr = randfuncs.RandomString(25, randfuncs.NewSource())
 		s.str = strr
 		s.urllobby[strr] = hub.NewLobby()
 
@@ -112,7 +112,7 @@ func WriteHashCookie(w http.ResponseWriter, key []byte) *http.Cookie {
 	time.Sleep(time.Millisecond * 25)
 	r1 := rand.New(rand.NewSource(time.Now().Unix()))
 	r1.Seed(time.Now().UnixNano())
-	cookie := &http.Cookie{Name: rnds.RandomString(15, r0), Value: rnds.RandomString(20, r1), Secure: true, Path: "/"}
+	cookie := &http.Cookie{Name: randfuncs.RandomString(15, r0), Value: randfuncs.RandomString(20, r1), Secure: true, Path: "/"}
 	mac.Write([]byte(cookie.Name))
 	mac.Write([]byte(cookie.Value))
 	signature := base64.StdEncoding.EncodeToString(mac.Sum(nil))

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"pokerGO/internal/player"
-	randomString "pokerGO/pkg/Strings"
+	"pokerGO/pkg/randfuncs"
 
 	"github.com/gorilla/websocket"
 )
@@ -90,7 +90,7 @@ func (l *Lobby) Game() {
 	}
 	timer := time.NewTicker(time.Second * 1)
 	PlayerBroadcast := make(chan player.Player)
-	k := randomString.NewSource().Intn(len(l.Occupied))
+	k := randfuncs.NewSource().Intn(len(l.Occupied))
 	l.PlayerTurn = plorder[k]
 	for {
 		select {
