@@ -1,4 +1,4 @@
-module pokerGO
+module github.com/retinotopic/pokerGO
 
 go 1.21.0
 

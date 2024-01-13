@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"pokerGO/internal/player"
-	"pokerGO/pkg/randfuncs"
 
 	"github.com/gorilla/websocket"
+
+	"pokerGO/pkg/randfuncs"
 )
 
 func NewLobby() *Lobby {
