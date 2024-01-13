@@ -9,12 +9,13 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"pokerGO/internal/hub"
-	"pokerGO/internal/player"
-	htmpl "pokerGO/pkg/htmx"
-	"pokerGO/pkg/randfuncs"
 	"strconv"
 	"time"
+
+	"github.com/retinotopic/pokerGO/internal/hub"
+	"github.com/retinotopic/pokerGO/internal/player"
+	htmpl "github.com/retinotopic/pokerGO/pkg/htmx"
+	"github.com/retinotopic/pokerGO/pkg/randfuncs"
 
 	"github.com/a-h/templ"
 	"github.com/gorilla/websocket"

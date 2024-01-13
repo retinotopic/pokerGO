@@ -1,7 +1,7 @@
 package player
 
 import (
-	"pokerGO/pkg/deck"
+	"github.com/retinotopic/pokerGO/pkg/deck"
 
 	"github.com/gorilla/websocket"
 )

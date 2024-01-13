@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
-	"pokerGO/internal/player"
+	"github.com/retinotopic/pokerGO/internal/player"
 
 	"github.com/gorilla/websocket"
 
-	"pokerGO/pkg/randfuncs"
+	"github.com/retinotopic/pokerGO/pkg/randfuncs"
 )
 
 func NewLobby() *Lobby {
