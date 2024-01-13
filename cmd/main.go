@@ -1,7 +1,7 @@
 package main
 
 import (
-	server "pokerGO/internal/app"
+	server "github.com/retinotopic/pokerGO/internal/app"
 )
 
 func main() {
