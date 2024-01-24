@@ -7,7 +7,7 @@ import (
 )
 
 func NewPlayer() *Player {
-	return &Player{inActive: &Active{p: &Player{}}, Active: &Active{p: &Player{}}, inGame: &inGame{p: &Player{}}, CurrentState: &Inactive{p: &Player{}}}
+	return &Player{InActive: &Active{p: &Player{}}, Active: &Active{p: &Player{}}, InGame: &inGame{p: &Player{}}, CurrentState: &Inactive{p: &Player{}}}
 }
 
 type Active struct {
@@ -16,13 +16,12 @@ type Active struct {
 
 func (s *Active) ToActive(Occupied map[int]bool) {}
 func (s *Active) ToInactive(Occupied map[int]bool) {
-	s.p.IsActive = s.p.MWPlayer.IsActive
 	delete(Occupied, s.p.Place)
-	s.p.SetState(s.p.inActive)
+	s.p.SetState(s.p.InActive)
 }
 func (s *Active) ToGame(Occupied map[int]bool, ch chan<- struct{}) {
 	if s.p.Admin == true && len(Occupied) >= 2 && s.p.MWPlayer.IsGame == true {
-		s.p.SetState(s.p.inGame)
+		s.p.SetState(s.p.InGame)
 		ch <- struct{}{}
 	}
 }
@@ -35,7 +34,6 @@ func (s *Inactive) ToActive(Occupied map[int]bool) {
 	if Occupied[s.p.MWPlayer.Place] == false {
 		s.p.Name = s.p.MWPlayer.Name
 		s.p.Bankroll = s.p.MWPlayer.Stack
-		s.p.IsActive = s.p.MWPlayer.IsActive
 		s.p.Place = s.p.MWPlayer.Place
 		Occupied[s.p.MWPlayer.Place] = true
 		s.p.SetState(s.p.Active)
@@ -63,16 +61,14 @@ type Stater interface {
 type Player struct {
 	Name         string `json:"Name"`
 	Bankroll     int    `json:"Stack"`
-	IsActive     bool   `json:"IsActive"`
-	IsGame       bool   `json:"IsGame"`
 	Conn         *websocket.Conn
 	Place        int       `json:"Place"`
 	Admin        bool      `json:"IsAdmin"`
 	Hand         deck.Card `json:"Hand,omitempty"`
 	ValueSec     int       `json:"Time,omitempty"`
-	inActive     Stater
+	InActive     Stater
 	Active       Stater
-	inGame       Stater
+	InGame       Stater
 	CurrentState Stater
 	MWPlayer     MiddlewarePlayer
 }

@@ -85,7 +85,7 @@ func (l *Lobby) Connhandle(plr *player.Player, conn *websocket.Conn) {
 func (l *Lobby) Game() {
 	plorder := []player.Player{}
 	for _, v := range l.Players {
-		if v.IsActive == true {
+		if v.CurrentState == v.InGame {
 			plorder = append(plorder, *v)
 		}
 	}

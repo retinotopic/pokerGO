@@ -1,17 +1,12 @@
 package server
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
-	"errors"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 	"strconv"
-	"time"
 
+	"github.com/retinotopic/pokerGO/internal/auth"
 	"github.com/retinotopic/pokerGO/internal/hub"
 	"github.com/retinotopic/pokerGO/internal/player"
 	htmpl "github.com/retinotopic/pokerGO/pkg/htmx"
@@ -26,8 +21,6 @@ type Server struct {
 	urllobby   map[string]*hub.Lobby
 	str        string
 }
-
-var key = []byte("cbaTd3Dx9_dfknwPsc5T0rQMx34SvJJf5xvxf7nab")
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -65,9 +58,9 @@ func (s *Server) lobbyMW(w http.ResponseWriter, r *http.Request) {
 	wsurl := r.URL.Path[7:]
 	fmt.Println(wsurl, "///")
 	if hub, ok := s.urllobby[wsurl]; ok {
-		cookie, err := ReadHashCookie(r, key, r.Cookies())
+		cookie, err := auth.ReadHashCookie(r, auth.Secretkey, r.Cookies())
 		if err != nil {
-			cookie = WriteHashCookie(w, key)
+			cookie = auth.WriteHashCookie(w, auth.Secretkey)
 		}
 		if _, ok := hub.Players[cookie.Value]; ok {
 			if hub.Players[cookie.Value].Conn == nil {
@@ -91,7 +84,7 @@ func (s *Server) lobbyMW(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.URL.Path[1:])
 	if hub, ok := s.urllobby[r.URL.Path[1:]]; ok {
-		cookie, err := ReadHashCookie(r, key, r.Cookies())
+		cookie, err := auth.ReadHashCookie(r, auth.Secretkey, r.Cookies())
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -105,38 +98,4 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/main", http.StatusNotFound)
 	}
 
-}
-
-func WriteHashCookie(w http.ResponseWriter, key []byte) *http.Cookie {
-	mac := hmac.New(sha256.New, key)
-	r0 := rand.New(rand.NewSource(time.Now().Unix()))
-	time.Sleep(time.Millisecond * 25)
-	r1 := rand.New(rand.NewSource(time.Now().Unix()))
-	r1.Seed(time.Now().UnixNano())
-	cookie := &http.Cookie{Name: randfuncs.RandomString(15, r0), Value: randfuncs.RandomString(20, r1), Secure: true, Path: "/"}
-	mac.Write([]byte(cookie.Name))
-	mac.Write([]byte(cookie.Value))
-	signature := base64.StdEncoding.EncodeToString(mac.Sum(nil))
-	cookie.Value = cookie.Value + signature
-	http.SetCookie(w, cookie)
-	return cookie
-}
-func ReadHashCookie(r *http.Request, key []byte, cookies []*http.Cookie) (*http.Cookie, error) {
-	if len(cookies) == 0 {
-		return nil, errors.New("zero cookies")
-	}
-	c := cookies[0]
-	name := c.Name
-	valueHash := c.Value
-	signature := valueHash[20:]
-	value := valueHash[:20]
-
-	mac := hmac.New(sha256.New, key)
-	mac.Write([]byte(name))
-	mac.Write([]byte(value))
-	expectedSignature := base64.StdEncoding.EncodeToString(mac.Sum(nil))
-	if !hmac.Equal([]byte(signature), []byte(expectedSignature)) {
-		return nil, errors.New("ValidationErr")
-	}
-	return c, nil
 }
